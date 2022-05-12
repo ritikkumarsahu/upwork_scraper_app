@@ -1,0 +1,99 @@
+/* body {background-color: rgba(30,30,30,1);} */
+/* body {background-color: rgba(55,65,81,1);} */
+p {
+    color: turquoise;
+}
+
+.log_time {
+    color:powderblue;
+}
+.log_module {
+    color:deepskyblue;
+}
+.log_line {
+    color:yellowgreen;
+}
+.log_message {
+    color:mintcream;
+}
+.log_WARNING {
+    color: gold;
+}
+.log_ERROR {
+    color:red;
+}
+.log_INFO {
+    color:royalblue;
+}
+
+/* Add a black background color to the top navigation */
+.topnav {
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    background-color: #3e3e42;
+    overflow: hidden;
+    display: flex;
+    padding: 5px ;
+    justify-content: space-evenly;
+}
+
+/* Style the links inside the navigation bar */
+.topnav button {
+color: #f2f2f2;
+text-align: center;
+text-decoration: none;
+font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav button:hover {
+background-color: #ddd;
+color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav button.active {
+background-color: #04AA6D;
+color: white;
+}
+
+.success,
+.error {
+  color: white;
+  padding: 5px;
+  margin: 5px 0 15px 0;
+}
+
+.success {
+  background: green;
+}
+
+.error {
+  background: red;
+}
+
+textarea.u-full-height {
+  height: 40vh;
+}
+
+.loading {
+  width: 2rem;
+  height: 2rem;
+  border: 5px solid #f3f3f3;
+  border-top: 6px solid #9c41f2;
+  border-radius: 100%;
+  margin: auto;
+  visibility: visible;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

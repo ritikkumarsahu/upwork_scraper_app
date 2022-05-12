@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logger</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+
+</head>
+<body>
+    <div class="topnav">
+        <button class="inactive">Pause</button>
+    </div>
+    <div id="logs" class="container"></div>
+    <script>
+        function createElementFromHTML(htmlString) {
+            let div = document.createElement('div');
+            div.innerHTML = htmlString.trim();
+            return [...div.childNodes]; 
+        }
+        let pause_btn = document.querySelector("button")
+        pause_btn.addEventListener("click", ()=>{
+            if (pause_btn.classList.contains("inactive")) {
+                pause_btn.classList.replace("inactive", "active");
+                pause_btn.innerText = "Resume";
+            }
+            else {
+                pause_btn.classList.replace("active", "inactive");
+                pause_btn.innerText = "Pause";
+            }
+        })
+
+        let eventSource = new EventSource("/log");
+        var childElems = [];
+        
+        eventSource.addEventListener("message", function(e) {
+            let childrens = createElementFromHTML(e.data);
+            if (pause_btn.classList.contains("inactive")) {
+                if (childElems.length>0){
+                    childElems.forEach(function(item){
+                        document.querySelector("#logs").appendChild(item);
+                    });
+                    childElems.splice(0,childElems.length);
+                }
+                childrens.forEach(function(item){
+                    document.querySelector("#logs").appendChild(item);
+                });
+            }
+            else {
+                childElems.push(...childrens);
+            }
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+        }, false)
+      </script>
+</body>
+</html>

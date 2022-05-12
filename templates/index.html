@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"
+    />
+    <link rel="stylesheet" href="{{url_for('static', filename='app.css')}}" />
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}" />
+    <title>Upwork Scraper</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1 style="text-align: center;">Upwork Scraper</h1>
+      <form id="scraper-form">
+        <div class="container ct1">
+          <div class="client-spend">
+            <h5>Client Spend $</h5>
+            <input
+              type="number"
+              id="client-spend"
+              class="u-full-width"
+              name="client-spend"
+              value="20000"
+              required
+            />
+          </div>
+
+          <div class="last-posted">
+            <h5>Last Posted</h5>
+            <input
+              type="date"
+              id="last-posted"
+              class="u-full-width"
+              name="last-posted"
+              required
+            />
+          </div>
+
+          <div class="country-specific">
+            <h5>Country</h5>
+            <div class="dropdown">
+              <button onclick="countryDropdown()" class="dropbtn">
+                Select Country to Exclude
+              </button>
+              <div class="dropdown-content" id="myDropdown">
+                <input
+                  type="text"
+                  placeholder="Search.."
+                  id="myInput"
+                  onkeyup="filterFunc()"
+                />
+
+                <div class="dropdown-item">
+                  <label>Select all</label>
+                  <input
+                    id="select-all"
+                    type="checkbox"
+                    onclick="selectAllCountries(this)"
+                  />
+                </div>
+                <br />
+                <div id="grouped" class="dropdown-item"></div>
+                <br />
+                <div id="ungrouped">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="project-length">
+            <h5>Project Length</h5>
+            <div class="block-item">
+              <label for="<1m">1 to 3 months</label>
+              <input type="checkbox" name="project-short" />
+            </div>
+
+            <div class="block-item">
+              <label for="<1m">3 to 6 months</label>
+              <input type="checkbox" name="project-medium" />
+            </div>
+
+            <div class="block-item">
+              <label for="<1m">More than 6 months</label>
+              <input type="checkbox" name="project-long" />
+            </div>
+          </div>
+
+          <div class="hourly-rate">
+            <div class="inline-checkbox">
+              <h5>Hourly Rate $</h5>
+              <label for="unspecified-jobs">include unspecified jobs</label>
+              <input id = "unspecified-jobs" type="checkbox" />
+            </div>
+            <br />
+
+            <input
+              type="number"
+              placeholder="Min"
+              name="hourly-rate-min"
+              value="20"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Max"
+              name="hourly-rate-max"
+              value="40"
+              required
+            />
+          </div>
+
+          <div class="payment-verified">
+            <h5>Payment Verfied</h5>
+            <div class="block-item">
+              <label for="payment-verified">Verified</label>
+              <input name="payment-verified" type="checkbox" />
+            </div>
+
+            <div class="block-item">
+              <label for="payment-unverified">Unverified</label>
+              <input name="payment-unverified" type="checkbox" />
+            </div>
+          </div>
+
+          <div class="job-level">
+            <h5>Job Level</h5>
+            <div class="block-item">
+              <label for="job-expert">Expert</label>
+              <input type="checkbox" name="job-expert" />
+            </div>
+
+            <div class="block-item">
+              <label for="job-intermediate">Intermediate</label>
+              <input type="checkbox" name="job-intermediate" />
+            </div>
+
+            <div class="block-item">
+              <label for="job-entry">Entry</label>
+              <input type="checkbox" name="job-entry" />
+            </div>
+          </div>
+
+          <div class="keyword">
+            <label for="keyword">Keywords</label>
+            <textarea
+              id="keywords"
+              name="keywords"
+              style="width: 30vw; height: 15vh;"
+              required
+            >
+            </textarea>
+          </div>
+        </div>
+
+        <div class="container ct2">
+          <div class="row">
+            <input type="button" value="Reset" class="one-half column" id="reset-btn" />
+            <input type="submit" value="Submit" class="one-half column" />
+          </div>
+        </div>
+      </form>
+      <table class="u-full-width">
+        <thead>
+          <tr>
+            <th>Keyword</th>
+            <th>Client Spend</th>
+            <th>Last Posted</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="keyword-list"></tbody>
+      </table>
+    </div>
+    <script src="{{url_for('static', filename='elemFunc.js')}}"></script>
+    <script src="{{url_for('static', filename='app.js')}}"></script>
+  </body>
+</html>

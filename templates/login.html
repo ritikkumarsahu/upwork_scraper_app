@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"
+    />
+    <style type="text/css">
+        h1{
+        text-align: center;
+        margin: 0;
+        padding-top: 20px;
+        }
+        .main{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+        input[type=submit].button-primary{
+        font-size: 14px;
+        }
+        form{
+        width: 40%;
+        margin-top: 100px;
+        }
+        @media(max-width: 660px){
+        form{
+        width: 70%;
+        }
+        }
+      </style>
+</head>
+<body>
+    <header>
+        <h1>Login to Upwork Scraper</h1>
+    </header>
+    <div class="main">
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="row">
+                <div class="twelve">
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                        {% if messages %}
+                            {% for category,msg in messages %}
+                                {% if category == "success" %}
+                                    <h6 class="u-full-width" style="color: green;">{{ msg }}</h6>
+                                {% endif %}
+                                {% if category == "error" %}
+                                    <h6 class="u-full-width" style="color: red;">{{ msg }}</h6>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve">
+                    <input type="email" name="email" placeholder="Email*" class="u-full-width" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve">
+                    <input type="password" name="password" placeholder="Password*" class="u-full-width" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve">
+                    <input type="submit" name="" class="button-primary u-full-width" value="Login">
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
