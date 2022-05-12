@@ -7,6 +7,8 @@ from LogsHandler import *
 from Scraper import *
 from flask_mysqldb import MySQL
 
+import config
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"
 
@@ -19,12 +21,12 @@ app.config['MYSQL_DB'] = 'UAT'
 app.config['MYSQL_HOST'] = 'db'
 app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-
+    
 mysql.init_app(app)
 
 @app.route('/log')
 def content():
-    log_file = 'upwork_scraper.log'
+    log_file = config.log_file
     def inner():
         file = open(log_file)
         cont = 'data: '.join(readFile(log_file))
@@ -91,17 +93,17 @@ def scrape_data():
     sql = f"""SELECT * FROM user_log WHERE keyword = "{keyword}" AND client_spent <= "{client_spent}" AND last_posted >= STR_TO_DATE("{last_posted}", '%Y-%m-%d') AND date_submitted <= STR_TO_DATE("{today}", '%Y-%m-%d')  """
     cur.execute(sql)
     user_log = cur.fetchone()
-    jobs_data = None
-    if user_log:
-        # already have scraped data for this keyword
-        # TODO: implement countries condition too
-        sql = f"""SELECT * FROM job WHERE keyword = "{keyword}" AND posted_on >= STR_TO_DATE("{last_posted}", '%Y-%m-%d') AND client_spent >= "{client_spent}" """
-        cur.execute(sql)
-        jobs_data = cur.fetchall()
-    else:
-        jobs_data = scrape_jobs(keyword, client_spent, last_posted, countries)
-        # update the job database with the new jobs_data
-    # update the user_log database with the new query    
+    jobs_data = []
+    # if user_log:
+    #     # already have scraped data for this keyword
+    #     # TODO: implement countries condition too
+    #     sql = f"""SELECT * FROM job WHERE keyword = "{keyword}" AND posted_on >= STR_TO_DATE("{last_posted}", '%Y-%m-%d') AND client_spent >= "{client_spent}" """
+    #     cur.execute(sql)
+    #     jobs_data = cur.fetchall()
+    # else:
+    #     jobs_data = scrape_jobs(keyword, client_spent, last_posted, countries)
+    #     # update the job database with the new jobs_data
+    # # update the user_log database with the new query    
     status = filter_jobs(jobs_data,keyword,project_length,unspecifiedJobs, hourlyRateMin, hourlyRateMax,paymentVerified,paymentUnverified, jobExpert, jobIntermediate, jobEntry, countries, create_file=True)
     return data, status
 
