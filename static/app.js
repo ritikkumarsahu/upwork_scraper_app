@@ -102,7 +102,8 @@ class UI {
     let yyyy = yesterday.getFullYear();
     document.getElementById("last-posted").value = yyyy + "-" + mm + "-" + dd;
     document.getElementById("client-spend").value = 20000;
-    document.getElementsByName("project-short")[0].checked = true;
+    document.getElementsByName("project-zero")[0].checked = false;
+    document.getElementsByName("project-short")[0].checked = false;
     document.getElementsByName("project-medium")[0].checked= true;
     document.getElementsByName("project-long")[0].checked= true;
     document.getElementById("unspecified-jobs").checked,
@@ -199,6 +200,7 @@ document
       clientSpend = document.getElementById("client-spend").value,
       lastPosted = document.getElementById("last-posted").value,
       projectLength = {
+        zero: document.getElementsByName("project-zero")[0].checked,
         short: document.getElementsByName("project-short")[0].checked,
         medium: document.getElementsByName("project-medium")[0].checked,
         long: document.getElementsByName("project-long")[0].checked
