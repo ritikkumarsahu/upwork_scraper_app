@@ -98,23 +98,21 @@ def scrape_data():
             if set(log['countries'].split(',')).issubset(countries):
                 flag = True
                 break
-    if flag:
-        # already have scraped data for this keyword
-        sql = """SELECT * FROM job WHERE keyword = %s AND Date(posted_on) >= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND client_spent >= %s """
-        cur.execute(sql, (keyword, last_posted, client_spent))
-        jobs_data = cur.fetchall()
-    else:
-        jobs_data = scrape_jobs(keyword, client_spent, last_posted, ','.join(countries))
-
-        # update the job database with the new jobs_data
+    if not flag:
+        scraped_data = scrape_jobs(keyword, client_spent, last_posted, ','.join(countries))
+        # update the job database with the new scraped_data
         sql = """INSERT INTO job (keyword, title, link, posted_on, hourly_budget_min, hourly_budget_max, fixed_budget, currency_code, is_job_fixed, is_payment_verified, job_level, project_length, country, total_jobs_posted, open_jobs, total_reviews, rating, total_hires, client_since, client_spent, skills) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s); """
-        for job_data in jobs_data:
+        for job_data in scraped_data:
             cur.execute(sql, (job_data['keyword'], job_data['title'], job_data['link'], parser.parse(job_data['posted_on']).strftime('%Y-%m-%d %H:%M:%S'), job_data['hourly_budget_min'], job_data['hourly_budget_max'], job_data['fixed_budget'], job_data['currency_code'], job_data['is_job_fixed'], job_data['is_payment_verified'], job_data['job_level'], job_data['project_length'], job_data['country'], job_data['total_jobs_posted'], job_data['open_jobs'], job_data['total_reviews'], job_data['rating'], job_data['total_hires'], parser.parse(job_data['client_since']).strftime('%Y-%m-%d %H:%M:%S'), job_data['client_spent'], job_data['skills']))
         mysql.connection.commit()
+        
+    sql = """SELECT * FROM job WHERE keyword = %s AND Date(posted_on) >= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND client_spent >= %s """
+    cur.execute(sql, (keyword, last_posted, client_spent))
+    jobs_data = cur.fetchall()
 
     # update the user_log database with the new query    
-    sql = """INSERT INTO user_log (user, date_submitted, keyword, last_posted, hourly_budget_min, hourly_budget_max, currency_code, unspecified_jobs, payment_verified, payment_unverified, job_expert, job_intermediate, job_entry, project_length_short, project_length_medium, project_length_long, client_spent, countries) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-    cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
+    sql = """INSERT INTO user_log (user, date_submitted, keyword, last_posted, hourly_budget_min, hourly_budget_max, currency_code, unspecified_jobs, payment_verified, payment_unverified, job_expert, job_intermediate, job_entry, project_length_zero, project_length_short, project_length_medium, project_length_long, client_spent, countries) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+    cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('zero'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
     mysql.connection.commit()
 
     status = filter_jobs(jobs_data,keyword,project_length,unspecifiedJobs, hourlyRateMin, hourlyRateMax,paymentVerified,paymentUnverified, jobType, countries, create_file=True)
