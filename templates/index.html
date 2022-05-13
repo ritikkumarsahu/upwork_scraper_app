@@ -42,10 +42,8 @@
 
           <div class="country-specific">
             <h5>Country</h5>
-            <div class="dropdown">
-              <button onclick="countryDropdown()" class="dropbtn">
-                Select Country to Exclude
-              </button>
+            <div >
+              <input type="button" value="Select Country to Exclude" onclick="countryDropdown()" class="dropbtn">
               <div class="dropdown-content" id="myDropdown">
                 <input
                   type="text"
@@ -73,6 +71,11 @@
 
           <div class="project-length">
             <h5>Project Length</h5>
+            <div class="block-item">
+              <label for="<1m">less than a month</label>
+              <input type="checkbox" name="project-zero" />
+            </div>
+
             <div class="block-item">
               <label for="<1m">1 to 3 months</label>
               <input type="checkbox" name="project-short" />
@@ -149,7 +152,7 @@
             <textarea
               id="keywords"
               name="keywords"
-              style="width: 30vw; height: 15vh;"
+              style="width: 35vw; height: 22vh;"
               required
             >
             </textarea>
@@ -175,6 +178,7 @@
         <tbody id="keyword-list"></tbody>
       </table>
     </div>
+    <script src="{{url_for('static', filename='country_list.js')}}"></script>
     <script src="{{url_for('static', filename='elemFunc.js')}}"></script>
     <script src="{{url_for('static', filename='app.js')}}"></script>
   </body>
