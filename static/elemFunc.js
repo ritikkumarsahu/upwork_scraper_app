@@ -1,6 +1,4 @@
 function populateCountries(){
-    ungrouped_countries = ['America','China','Russia','Ukrain','Japan']
-    grouped_countries = ['Nepal','Bhutan','India']
     let ungrouped = document.getElementById("ungrouped");
     let grouped = document.getElementById("grouped");
     ungrouped.innerHTML = '';
