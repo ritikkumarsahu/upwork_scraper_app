@@ -1,7 +1,9 @@
 import requests
 import os
 import csv
-def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin, hourlyRateMax, paymentVerified, paymentUnverified, jobExpert, jobIntermediate, jobEntry, countries, create_file=True):
+import config
+
+def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin, hourlyRateMax, paymentVerified, paymentUnverified, jobType, countries, create_file=True):
     if len(job_data) == 0:
         return 404
     res_data = []
@@ -14,16 +16,13 @@ def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin
     return 200
 
 def scrape_jobs(keyword, client_spent, last_posted, countries):
-    url = "http://backend:3000"
+    url = config.BACKEND_BASE_URL
     params = {
         "keyword": keyword,
         "client_spent": client_spent,
         "last_posted": last_posted,
         "countries":countries
     }
-    # response = requests.get(url, params=params)
-    # return response.json()
-    return [params]
-
-
-
+    response = requests.get(url, params=params)
+    print(response.url)
+    return response.json()
