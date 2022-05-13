@@ -169,7 +169,17 @@ const startScraping = (callback) => {
   };
 
   fetch("/scrape", options)
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        // make the promise be rejected if we didn't get a 2xx response
+        let err = new Error(`Request failed for ${data.keyword}, code: ${response.status}`)
+        if (response.status === 404) err = new Error(`No data found for ${data.keyword}, code: ${response.status}`)
+        err.response = response;
+        alert(err.message);
+        throw err; 
+      }
+      return response.json()
+    })
     .then((data) => {
       console.log("Success:", data);
       callback(topElement.cells[3].firstChild, data, true);
@@ -210,7 +220,7 @@ document
       ...new Set(
         keywords
           .toString()
-          .toUpperCase()
+          .toLowerCase()
           .split("\n")
           .filter((e) => e)
       ),
