@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"
+    />
+    <link rel="stylesheet" href="{{url_for('static', filename='app.css')}}" />
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}" />
+    <title>Upwork Scraper</title>
+  </head>
+<body>
+    <div class="navbar">
+        <div class="row">
+          <div class="two columns">
+            <div class="logo">
+              <h5 class="site-title">Upwork Scraper</h5>
+            </div>
+          </div>
+          <div class="ten columns">
+            <ul class="menu-ul">
+              <li class="menu-li"><a class="menu_items" href="{{ url_for('index') }}">Home</a></li>
+              <li class="menu-li"><a class="menu_items" href="{{ url_for('jobs') }}">My Jobs</a></li>
+              <li class="menu-li"><a class="menu_items" href="#">Services</a></li>
+              <li class="menu-li"><a class="menu_items" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>    
+      {% block content %} 
+      {% endblock %}
+</body>
+</html>
