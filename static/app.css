@@ -1,5 +1,38 @@
-/* body {background-color: rgba(30,30,30,1);} */
-/* body {background-color: rgba(55,65,81,1);} */
+body{
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+.site-title {
+  margin: 0;
+  line-height: 2;
+  font-size: 24px;
+  color: #fff;
+}
+.menu-ul{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.menu-li{
+  padding: 10px 25px;
+  margin: 0;
+}
+.menu_items{
+  text-decoration: none;
+  color: #fff;
+  font-size: 18px;
+}
+
+.navbar{
+  background: #1C8D73;
+  padding: 10px 25px;
+  margin-bottom: 10px;
+}
+
 p {
     color: turquoise;
 }
@@ -88,7 +121,10 @@ textarea.u-full-height {
   visibility: visible;
   animation: spin 1s infinite linear;
 }
-
+.edit-icon {
+  display: inline-block;
+  transform: rotateZ(90deg);
+}
 @keyframes spin {
   from {
     transform: rotate(0deg);

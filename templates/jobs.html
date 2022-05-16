@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="padding: 20px;">
+    <table class="u-full-width">
+        <thead>
+            <tr>
+            <th>Keyword</th>
+            <th>Client Spend</th>
+            <th>Last Posted</th>
+            <th>Created on</th>
+            <th>Status</th>
+            <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs_data %}
+            <tr>
+                <td>{{log.keyword}}</td>
+                <td>{{log.client_spent}}</td>
+                <td>{{log.last_posted}}</td>
+                <td>{{log.date_submitted}}</td>
+                {% if log.is_scraped == 1 %}
+                <td>Done</td>
+                {% else %}
+                <td>Error</td>
+                {% endif %}
+                <td><a href="{{ url_for('index', log_id=log.id) }}" class="edit-icon">&#9998;<a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
