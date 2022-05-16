@@ -4,11 +4,12 @@ import csv
 import config
 
 def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin, hourlyRateMax, paymentVerified, paymentUnverified, jobType, countries, create_file=True):
+    job_data = list(job_data)
+    job_data_length = len(job_data)
     if len(job_data) == 0:
         return 404
 
     file_header = job_data[0].keys()
-    job_data_length = len(job_data)
     projectLength_map = {1: projectLength['zero'], 2: projectLength['short'], 3: projectLength['medium'], 4: projectLength['long']}
     jobType_map = {1: jobType['entry'], 2: jobType['intermediate'], 3: jobType['expert']}
     
