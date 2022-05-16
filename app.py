@@ -24,31 +24,38 @@ app.config['MYSQL_PORT'] = config.MYSQL_PORT
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['SESSION_COOKIE_NAME'] = 'upwork_scraper'
 
-@app.route('/log')
-def content():
-    log_file = config.log_file
-    def inner():
-        file = open(log_file)
-        cont = 'data: '.join(readFile(log_file))
-        yield "data: " +f"{cont}"+"\n\n"
-        loglines = follow(file)
-        for line in loglines:
-            yield "data: " +f"{line}"+"\n\n"
-        file.close()  
-    return Response(inner(), mimetype='text/event-stream')
+# @app.route('/log')
+# def content():
+#     log_file = config.log_file
+#     def inner():
+#         file = open(log_file)
+#         cont = 'data: '.join(readFile(log_file))
+#         yield "data: " +f"{cont}"+"\n\n"
+#         loglines = follow(file)
+#         for line in loglines:
+#             yield "data: " +f"{line}"+"\n\n"
+#         file.close()  
+#     return Response(inner(), mimetype='text/event-stream')
 
-@app.route('/info')
-def sysytem_info():
-    processes = getListOfProcessSortedByMemory()
-    network_usage = net_usage()
-    return jsonify({
-        "cpu_percent" : psutil.cpu_percent(),
-        "virtual_memory" : psutil.virtual_memory().percent,
-        "network_download" : network_usage[0],
-        "network_upload" : network_usage[1],
-        "processes" : len(processes),
-        "threads" : sum([ x['threads'] for x in processes])
-        })
+# @app.route('/info')
+# def sysytem_info():
+#     processes = getListOfProcessSortedByMemory()
+#     network_usage = net_usage()
+#     return jsonify({
+#         "cpu_percent" : psutil.cpu_percent(),
+#         "virtual_memory" : psutil.virtual_memory().percent,
+#         "network_download" : network_usage[0],
+#         "network_upload" : network_usage[1],
+#         "processes" : len(processes),
+#         "threads" : sum([ x['threads'] for x in processes])
+#         })
+
+# @app.route('/logger')
+# def logger():
+#     if session.get('loggedin'):
+#         return render_template('logger.html')
+#     flash("login first!", category="error")
+#     return redirect(url_for('login'))
 
 @app.route('/')
 def index():
@@ -64,7 +71,7 @@ def index():
             "project_length_long": 1,
             "unspecified_jobs": 1,
             "hourly_budget_min": "20",
-            "hourly_budget_max": "40",
+            "hourly_budget_max": "999999",
             "payment_verified": 1,
             "payment_unverified": 1,
             "job_expert": 1,
@@ -92,13 +99,6 @@ def index():
     else:
         flash("login first!", category="error")
         return redirect(url_for('login'))
-
-@app.route('/logger')
-def logger():
-    if session.get('loggedin'):
-        return render_template('logger.html')
-    flash("login first!", category="error")
-    return redirect(url_for('login'))
 
 @app.route('/scrape', methods=["POST"])
 def scrape_data():
