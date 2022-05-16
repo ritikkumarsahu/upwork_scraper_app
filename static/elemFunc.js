@@ -3,6 +3,10 @@ function populateCountries(){
     let grouped = document.getElementById("grouped");
     ungrouped.innerHTML = '';
     grouped.innerHTML = '';
+    ungrouped_countries = []
+    countries.forEach((country)=>{
+        if (Array.from(grouped_countries).indexOf(country) === -1) ungrouped_countries.push(country);
+    })
     ungrouped_countries.forEach((e)=> {
         let div = document.createElement("div");
         div.classList = ["dropdown-item"];
