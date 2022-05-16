@@ -259,6 +259,7 @@ document.getElementById("keyword-list").addEventListener("click", function (e) {
     ui.addKeyword(e.target);
     // Show message
     ui.showAlert("keyword Added!", "success");
+    prepareScraping();
   }
   if (e.target.className !== "done") {
     e.preventDefault();
@@ -271,4 +272,3 @@ document.getElementById("reset-btn").addEventListener("click", function (e) {
 })
 // Main Content
 const ui = new UI();
-ui.clearFields();
