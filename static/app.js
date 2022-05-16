@@ -175,6 +175,7 @@ const startScraping = (callback) => {
         // make the promise be rejected if we didn't get a 2xx response
         let err = new Error(`Request failed for ${data.keyword}, code: ${response.status}`)
         if (response.status === 404) err = new Error(`No data found for ${data.keyword}, code: ${response.status}`)
+        else if (response.status === 500) err = new Error(`Internal server error for ${data.keyword}, Please contact Admin!, code: ${response.status}`)
         err.response = response;
         alert(err.message);
         throw err; 
