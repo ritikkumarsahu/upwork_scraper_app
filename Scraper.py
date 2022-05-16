@@ -37,6 +37,18 @@ def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin
         del job_data[i] 
 
     if create_file:
+        project_lenght_map = {
+            1: 'less than a month', 2: '1 to 3 months', 3: '3 to 6 months', 4: 'More than 6 months'
+        }
+        job_level_map = {
+            1: 'beginner', 2: 'intermediate', 3: 'expert'
+        }
+        for i,_ in enumerate(job_data):
+            job_data[i]['is_job_fixed'] = 'fixed' if job_data[i]['is_job_fixed'] else 'hourly'
+            job_data[i]['is_payment_verified'] = 'verified' if job_data[i]['is_payment_verified'] else 'unverified'
+            job_data[i]['job_level'] = job_level_map[job_data[i]['job_level']]
+            job_data[i]['project_length'] = project_lenght_map[job_data[i]['project_length']]
+
         with open(os.path.join("static",f'data/{keyword}.csv'), 'w', newline='', encoding="utf-8") as csvfile:
             csv_writer = csv.DictWriter(csvfile, file_header)
             csv_writer.writeheader()
