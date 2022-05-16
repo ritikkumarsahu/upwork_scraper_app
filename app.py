@@ -11,7 +11,7 @@ from flask_mysqldb import MySQL
 import config
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "secret!"
+app.config["SECRET_KEY"] = config.SECRET_KEY
 
 mysql = MySQL(app)
    
@@ -52,7 +52,42 @@ def sysytem_info():
 @app.route('/')
 def index():
     if session.get('loggedin'):
-        return render_template('index.html')
+        log_id = request.args.get('log_id')
+        log_data = {
+            "keyword": "",
+            "client_spent": "20000",
+            "last_posted": datetime.utcnow().strftime('%Y-%m-%d'),
+            "project_length_zero": 0,
+            "project_length_short": 0,
+            "project_length_medium": 1,
+            "project_length_long": 1,
+            "unspecified_jobs": 1,
+            "hourly_budget_min": "20",
+            "hourly_budget_max": "40",
+            "payment_verified": 1,
+            "payment_unverified": 1,
+            "job_expert": 1,
+            "job_intermediate": 1,
+            "job_entry": 0,
+            "countries": [
+                "Bhutan",
+                "India",
+                "Myanmar",
+                "Nepal",
+                "Pakistan",
+                "Sri Lanka"
+            ]
+        }
+        if log_id:
+            cur = mysql.connection.cursor()
+            sql = """SELECT * FROM user_log WHERE id = %s"""
+            cur.execute(sql, (log_id))
+            _log_data = cur.fetchone()
+            if _log_data:
+                _log_data['countries'] =  _log_data['countries'].split(',')
+                _log_data['last_posted'] = _log_data['last_posted'].strftime('%Y-%m-%d')
+                log_data = _log_data
+        return render_template('index.html', log_data=log_data)
     else:
         flash("login first!", category="error")
         return redirect(url_for('login'))
@@ -66,14 +101,17 @@ def logger():
 
 @app.route('/scrape', methods=["POST"])
 def scrape_data():
+    if not session.get('loggedin'):
+        flash("login first!", category="error")
+        return redirect(url_for('login'))
     data = request.get_json()
-    client_spent = int(data.get('clientSpend'))
+    client_spent = int(float(data.get('clientSpend')))
     last_posted = data.get('lastPosted')
     keyword = data.get('keyword')
     project_length = data.get('projectLength')
     unspecifiedJobs = data.get('unspecifiedJobs')
-    hourlyRateMin = data.get('hourlyRateMin')
-    hourlyRateMax = data.get('hourlyRateMax')
+    hourlyRateMin = int(data.get('hourlyRateMin'))
+    hourlyRateMax = int(data.get('hourlyRateMax'))
     paymentVerified = data.get('paymentVerified')
     paymentUnverified = data.get('paymentUnverified')
     jobType = {
@@ -87,7 +125,7 @@ def scrape_data():
     
     # check if user already has scraped data for this keyword
     cur = mysql.connection.cursor()
-    sql = """SELECT * FROM user_log WHERE keyword = %s AND client_spent <= %s AND Date(last_posted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND Date(date_submitted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') """
+    sql = """SELECT * FROM user_log WHERE keyword = %s AND is_scraped = 1 AND client_spent <= %s AND Date(last_posted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND Date(date_submitted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') """
     cur.execute(sql, (keyword, client_spent, last_posted, today))
     user_log = cur.fetchall()
     flag = False
@@ -110,20 +148,36 @@ def scrape_data():
     cur.execute(sql, (keyword, last_posted, client_spent))
     jobs_data = cur.fetchall()
 
+    status = filter_jobs(jobs_data,keyword,project_length,unspecifiedJobs, hourlyRateMin, hourlyRateMax,paymentVerified,paymentUnverified, jobType, countries, create_file=True)
     # update the user_log database with the new query    
-    sql = """INSERT INTO user_log (user, date_submitted, keyword, last_posted, hourly_budget_min, hourly_budget_max, currency_code, unspecified_jobs, payment_verified, payment_unverified, job_expert, job_intermediate, job_entry, project_length_zero, project_length_short, project_length_medium, project_length_long, client_spent, countries) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-    cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('zero'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
+    sql = """INSERT INTO user_log (user, date_submitted, is_scraped, keyword, last_posted, hourly_budget_min, hourly_budget_max, currency_code, unspecified_jobs, payment_verified, payment_unverified, job_expert, job_intermediate, job_entry, project_length_zero, project_length_short, project_length_medium, project_length_long, client_spent, countries) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+    cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), status == 200, keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('zero'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
     mysql.connection.commit()
 
-    status = filter_jobs(jobs_data,keyword,project_length,unspecifiedJobs, hourlyRateMin, hourlyRateMax,paymentVerified,paymentUnverified, jobType, countries, create_file=True)
     return jsonify({'file':f"/file/{keyword}"}), status
 
 @app.route('/file/<filename>', methods=["get"])
 def download_csv(filename):
+    if not session.get('loggedin'):
+        flash("login first!", category="error")
+        return redirect(url_for('login'))
     file_path = f"{app.root_path}/static/data/{filename}.csv"
     if os.path.isfile(file_path):
         return send_file(file_path, mimetype="text/csv")
     return file_path, 404
+
+@app.route('/jobs',methods=["GET"])
+def jobs():
+    if not session.get('loggedin'):
+        flash("login first!", category="error")
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+    print(user_id)
+    cur = mysql.connection.cursor()
+    sql = """SELECT * FROM user_log WHERE user = %s"""
+    cur.execute(sql, (user_id,))
+    logs_data = cur.fetchall()
+    return render_template('jobs.html', logs_data = logs_data)
 
 @app.route('/login',methods=["GET","POST"])
 def login():
@@ -132,7 +186,7 @@ def login():
     email = request.form.get("email")
     password = request.form.get("password")
     cur = mysql.connection.cursor()
-    sql = f"""SELECT * FROM user WHERE email = %s AND password = %s """
+    sql = """SELECT * FROM user WHERE email = %s AND password = %s """
     cur.execute(sql, (email, password))
     user = cur.fetchone()
     cur.close()
@@ -150,9 +204,9 @@ def login():
 def logout():
     session.pop('loggedin',None)
     session.pop('email',None)
+    session.pop('user_id',None)
     flash("You are successfully logged out", category="success")
     return redirect(url_for('login'))
-
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
