@@ -48,7 +48,8 @@ def filter_jobs(job_data, keyword, projectLength, unspecifiedJobs, hourlyRateMin
             job_data[i]['is_payment_verified'] = 'verified' if job_data[i]['is_payment_verified'] else 'unverified'
             job_data[i]['job_level'] = job_level_map[job_data[i]['job_level']]
             job_data[i]['project_length'] = project_lenght_map[job_data[i]['project_length']]
-
+        if not os.path.exists(os.path.join("static",'data')):
+            os.mkdir(os.path.join("static",'data'))
         with open(os.path.join("static",f'data/{keyword}.csv'), 'w', newline='', encoding="utf-8") as csvfile:
             csv_writer = csv.DictWriter(csvfile, file_header)
             csv_writer.writeheader()
