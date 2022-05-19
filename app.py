@@ -7,7 +7,24 @@ import psutil
 from LogsHandler import *
 from Scraper import *
 from flask_mysqldb import MySQL
+from logging.config import dictConfig
+import logging
 
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['wsgi']
+    }
+})
+logger = logging.getLogger(__name__)
 import config
 
 app = Flask(__name__)
@@ -127,7 +144,10 @@ def scrape_data():
     # check if user already has scraped data for this keyword
     cur = mysql.connection.cursor()
     sql = """SELECT * FROM user_log WHERE keyword = %s AND is_scraped = 1 AND client_spent <= %s AND Date(last_posted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND Date(date_submitted) <= STR_TO_DATE(%s, '%%Y-%%m-%%d') """
-    cur.execute(sql, (keyword, client_spent, last_posted, today))
+    try:
+        cur.execute(sql, (keyword, client_spent, last_posted, today))
+    except Exception as e:
+        logger.error(e)
     user_log = cur.fetchall()
     flag = False
     jobs_data = []
@@ -142,17 +162,26 @@ def scrape_data():
         # update the job database with the new scraped_data
         sql = """INSERT INTO job (keyword, title, link, posted_on, hourly_budget_min, hourly_budget_max, fixed_budget, currency_code, is_job_fixed, is_payment_verified, job_level, project_length, country, total_jobs_posted, open_jobs, total_reviews, rating, total_hires, client_since, client_spent, skills) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s); """
         for job_data in scraped_data:
-            cur.execute(sql, (job_data['keyword'], job_data['title'], job_data['link'], parser.parse(job_data['posted_on']).strftime('%Y-%m-%d %H:%M:%S'), job_data['hourly_budget_min'], job_data['hourly_budget_max'], job_data['fixed_budget'], job_data['currency_code'], job_data['is_job_fixed'], job_data['is_payment_verified'], job_data['job_level'], job_data['project_length'], job_data['country'], job_data['total_jobs_posted'], job_data['open_jobs'], job_data['total_reviews'], job_data['rating'], job_data['total_hires'], parser.parse(job_data['client_since']).strftime('%Y-%m-%d %H:%M:%S'), job_data['client_spent'], job_data['skills']))
+            try:
+                cur.execute(sql, (job_data['keyword'], job_data['title'], job_data['link'], parser.parse(job_data['posted_on']).strftime('%Y-%m-%d %H:%M:%S'), job_data['hourly_budget_min'], job_data['hourly_budget_max'], job_data['fixed_budget'], job_data['currency_code'], job_data['is_job_fixed'], job_data['is_payment_verified'], job_data['job_level'], job_data['project_length'], job_data['country'], job_data['total_jobs_posted'], job_data['open_jobs'], job_data['total_reviews'], job_data['rating'], job_data['total_hires'], parser.parse(job_data['client_since']).strftime('%Y-%m-%d %H:%M:%S'), job_data['client_spent'], job_data['skills']))
+            except Exception as e:
+                logger.error(e)
         mysql.connection.commit()
         
     sql = """SELECT * FROM job WHERE keyword = %s AND Date(posted_on) >= STR_TO_DATE(%s, '%%Y-%%m-%%d') AND client_spent >= %s """
-    cur.execute(sql, (keyword, last_posted, client_spent))
+    try:
+        cur.execute(sql, (keyword, last_posted, client_spent))
+    except Exception as e:
+        logger.error(e)
     jobs_data = cur.fetchall()
 
     status = filter_jobs(jobs_data,keyword,project_length,unspecifiedJobs, hourlyRateMin, hourlyRateMax,paymentVerified,paymentUnverified, jobType, countries, create_file=True)
     # update the user_log database with the new query    
     sql = """INSERT INTO user_log (user, date_submitted, is_scraped, keyword, last_posted, hourly_budget_min, hourly_budget_max, currency_code, unspecified_jobs, payment_verified, payment_unverified, job_expert, job_intermediate, job_entry, project_length_zero, project_length_short, project_length_medium, project_length_long, client_spent, countries) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-    cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), status == 200, keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('zero'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
+    try:
+        cur.execute(sql, (session.get('user_id'), datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'), status == 200, keyword, last_posted, hourlyRateMin, hourlyRateMax, 'USD', unspecifiedJobs, paymentVerified, paymentUnverified, jobType.get('expert'), jobType.get('intermediate'), jobType.get('entry'), project_length.get('zero'), project_length.get('short'), project_length.get('medium'), project_length.get('long'), client_spent, ','.join(countries)))
+    except Exception as e:
+        logger.error(e)
     mysql.connection.commit()
 
     return jsonify({'file':f"/file/{keyword}"}), status
@@ -173,7 +202,7 @@ def jobs():
         flash("login first!", category="error")
         return redirect(url_for('login'))
     user_id = session.get('user_id')
-    print(user_id)
+    logger.debug(user_id)
     cur = mysql.connection.cursor()
     sql = """SELECT * FROM user_log WHERE user = %s"""
     cur.execute(sql, (user_id,))
@@ -191,8 +220,8 @@ def login():
     cur.execute(sql, (email, password))
     user = cur.fetchone()
     cur.close()
-    print(user)
     if user:
+        logger.debug(f'user is validated: {user}')
         session['loggedin'] = True
         session['email'] = user["email"]
         session['user_id'] = user["id"]
