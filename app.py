@@ -216,13 +216,6 @@ def login():
     email = request.form.get("email")
     password = request.form.get("password")
     cur = mysql.connection.cursor()
-    # check if too many users are logged in
-    sql = """SELECT logged_in FROM user WHERE logged_in = 1"""
-    cur.execute(sql)
-    users = cur.fetchall()
-    if users and len(list(users)) > 1:
-        flash("Too many users are curently logged in! Please try later.", category="error")
-        return redirect(url_for('login'))
     sql = """SELECT * FROM user WHERE email = %s AND password = %s AND disabled = 0"""
     cur.execute(sql, (email, password))
     user = cur.fetchone()
@@ -232,9 +225,6 @@ def login():
         session['loggedin'] = True
         session['email'] = user["email"]
         session['user_id'] = user["id"]
-        sql = """UPDATE user SET logged_in = 1 WHERE id = %s"""
-        cur.execute(sql, user["id"]);
-        mysql.connection.commit()
         return redirect(url_for('index'))
     else:
         flash("user/password is wrong or doesn't exists!", category="error")
